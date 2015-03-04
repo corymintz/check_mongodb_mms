@@ -5,14 +5,63 @@
 package main
 
 import (
+	"./util"
 	"flag"
 	"fmt"
+	"github.com/fractalcat/nagiosplugin"
 	"math"
 	"os"
 )
 
+const (
+	CredFile = ".mongodb_mms"
+)
+
+var groupId string
+var server string
+var metric string
+var hostname string
+var warning float64
+var critical float64
+var timeout int
+
 func main() {
+	setupFlags()
+	if metric == "" || server == "" || groupId == "" {
+		flag.Usage()
+		os.Exit(2)
+		return
+	}
+
+	check := nagiosplugin.NewCheck()
+	defer check.Finish()
+
+	config, err := util.LoadConfigFromHome(CredFile)
+	if err != nil {
+		check.AddResultf(nagiosplugin.UNKNOWN, "%v", err)
+		return
+	}
+
+	username, apikey := config.GetCredentials()
+	api, err := util.NewMMSAPI(hostname, username, apikey)
+	if err != nil {
+		check.AddResultf(nagiosplugin.UNKNOWN, "Failed to create API. Err: %v", err)
+		return
+	}
+
+	host, err := api.GetHostByName(groupId, server)
+	if err != nil {
+		check.AddResultf(nagiosplugin.UNKNOWN, "%v", err)
+		return
+	}
+
+	check.AddResult(nagiosplugin.OK, fmt.Sprintf("%v", host))
+}
+
+func setupFlags() {
 	const (
+		groupIdDefault  = ""
+		groupIdUsage    = "The MMS/Ops Manager group ID that contains the server"
 		serverDefault   = ""
 		serverUsage     = "hostname of the mongod/s to check"
 		metricDefault   = ""
@@ -27,32 +76,30 @@ func main() {
 		timeoutUsage    = "connection timeout connecting MMS/Ops Manager service"
 	)
 
-	var server string
+	flag.StringVar(&groupId, "groupid", groupIdDefault, groupIdUsage)
+	flag.StringVar(&groupId, "g", groupIdDefault, groupIdUsage+" (shorthand)")
+
 	flag.StringVar(&server, "server", serverDefault, serverUsage)
 	flag.StringVar(&server, "s", serverDefault, serverUsage+" (shorthand)")
 
-	var metric string
 	flag.StringVar(&metric, "metric", metricDefault, metricUsage)
 	flag.StringVar(&metric, "m", metricDefault, metricUsage+" (shorthand)")
 
-	var hostname string
 	flag.StringVar(&hostname, "hostname", hostnameDefault, hostnameUsage)
 	flag.StringVar(&hostname, "H", hostnameDefault, hostnameUsage+" (shorthand)")
 
-	var warning float64
 	flag.Float64Var(&warning, "warning", warningDefault, warningUsage)
 	flag.Float64Var(&warning, "w", warningDefault, warningUsage+" (shorthand)")
 
-	var critical float64
 	flag.Float64Var(&critical, "critical", criticalDefault, criticalUsage)
 	flag.Float64Var(&critical, "c", criticalDefault, criticalUsage+" (shorthand)")
 
-	var timeout int
 	flag.IntVar(&timeout, "timeout", timeoutDefault, timeoutUsage)
 	flag.IntVar(&timeout, "t", timeoutDefault, timeoutUsage+" (shorthand)")
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stdout, "Usage: check_mongodb_mms  -s server -m metric [-H hostname] [-t timeout] [-w warning_level] [-c critica_level]\n")
+		fmt.Fprintf(os.Stdout, "Usage: check_mongodb_mms  -g groupid -s server -m metric [-H hostname] [-t timeout] [-w warning_level] [-c critica_level]\n")
+		fmt.Fprintf(os.Stdout, "     -g, --groupid  %v\n", groupIdUsage)
 		fmt.Fprintf(os.Stdout, "     -s, --server  %v\n", serverUsage)
 		fmt.Fprintf(os.Stdout, "     -m, --metric %v\n", metricUsage)
 		fmt.Fprintf(os.Stdout, "     -H, --hostname (default: %v) %v\n", hostnameDefault, hostnameUsage)
@@ -61,10 +108,4 @@ func main() {
 		fmt.Fprintf(os.Stdout, "     -t, --timeout (default: %v) %v\n", timeoutDefault, timeoutUsage)
 	}
 	flag.Parse()
-
-	if metric == metricDefault || server == serverDefault {
-		flag.Usage()
-		os.Exit(2)
-		return
-	}
 }

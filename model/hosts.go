@@ -7,3 +7,7 @@ package model
 type Host struct {
 	Id string `json:"id"`
 }
+
+type HostsResponse struct {
+	Hosts []Host `json:"results"`
+}
