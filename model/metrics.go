@@ -44,7 +44,7 @@ var metricFormaters = map[string]string{
 	"ASSERT_REGULAR":                      "%v regular asserts since process started",
 	"ASSERT_USER":                         "%v user asserts since process started",
 	"ASSERT_WARNING":                      "%v warnings raised since process started",
-	"BACKGROUND_FLUSH_AVG":                "%v second background flush average",
+	"BACKGROUND_FLUSH_AVG":                "%v millisecond background flush average",
 	"COMPUTED_MEMORY":                     "%v megabytes non-mapped virtual memory",
 	"CONNECTIONS":                         "%v active connections opened",
 	"CURSORS_TOTAL_OPEN":                  "%v active cursors",
