@@ -43,3 +43,5 @@ Virtual Memory usage is considered a warning at 8000 MB and critical at 10000 MB
 
     ./check_mongodb_mms -g 54f84f43e6ccc36e22eef700 -H my-server.example.com:27017 -m MEMORY_VIRTUAL -w 8000 -c 10000
 
+# TODO
+* DB level metrics are not implemented
