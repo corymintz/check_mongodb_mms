@@ -184,12 +184,14 @@ func setupFlags() {
 		fmt.Fprintf(os.Stdout, "Usage: check_mongodb_mms  -g groupid -s server [-m metric] [-a age] [-H hostname] [-t timeout] [-w warning_level] [-c critica_level]\n")
 		fmt.Fprintf(os.Stdout, "     -g, --groupid  %v\n", groupIdUsage)
 		fmt.Fprintf(os.Stdout, "     -s, --server  %v\n", serverUsage)
-		fmt.Fprintf(os.Stdout, "     -m, --metric (no metric means check last ping again maxage) %v\n", metricUsage)
+		fmt.Fprintf(os.Stdout, "     -m, --metric (no metric means check last ping age in seconds) %v\n", metricUsage)
 		fmt.Fprintf(os.Stdout, "     -a, --maxage (default %v) %v\n", maxAgeDefault, maxAgeUsage)
 		fmt.Fprintf(os.Stdout, "     -H, --hostname (default: %v) %v\n", hostnameDefault, hostnameUsage)
 		fmt.Fprintf(os.Stdout, "     -w, --warning (default: %v) %v\n", warningDefault, warningUsage)
 		fmt.Fprintf(os.Stdout, "     -c, --critical (default: %v) %v\n", criticalDefault, criticalUsage)
 		fmt.Fprintf(os.Stdout, "     -t, --timeout (default: %v) %v\n", timeoutDefault, timeoutUsage)
+		fmt.Fprintf(os.Stdout, "\n     -w and -c support the standard nagios threshold formats.\n"+
+			"     See https://nagios-plugins.org/doc/guidelines.html#THRESHOLDFORMAT for more details.\n")
 	}
 	flag.Parse()
 }
