@@ -22,7 +22,7 @@ func main() {
 	}
 
 	username, apikey := config.GetCredentials()
-	api, err := util.NewMMSAPI("https://mms.mongodb.com", username, apikey)
+	api, err := util.NewMMSAPI("https://mms.mongodb.com", 10, username, apikey)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v", err)
 		return

@@ -4,8 +4,13 @@
 
 package model
 
+import (
+	"time"
+)
+
 type Host struct {
-	Id string `json:"id"`
+	Id       string    `json:"id"`
+	LastPing time.Time `json:"lastPing"`
 }
 
 type HostsResponse struct {
