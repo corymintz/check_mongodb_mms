@@ -120,7 +120,7 @@ func doMetricCheck(check *nagiosplugin.Check, api *util.MMSAPI, host *model.Host
 	}
 
 	if critRange.Check(lastDataPoint.Value) {
-		check.AddResultf(nagiosplugin.CRITICAL, "%v %v %v", metricName, lastDataPoint.Value, util.APIUnits[metric.Units])
+		check.AddResultf(nagiosplugin.CRITICAL, metric.ToStringLastDataPoint())
 		return
 	}
 
@@ -131,11 +131,11 @@ func doMetricCheck(check *nagiosplugin.Check, api *util.MMSAPI, host *model.Host
 	}
 
 	if warnRange.Check(lastDataPoint.Value) {
-		check.AddResultf(nagiosplugin.WARNING, "%v %v %v", metricName, lastDataPoint.Value, util.APIUnits[metric.Units])
+		check.AddResultf(nagiosplugin.WARNING, metric.ToStringLastDataPoint())
 		return
 	}
 
-	check.AddResultf(nagiosplugin.OK, fmt.Sprintf("%v %v %v", metricName, lastDataPoint.Value, util.APIUnits[metric.Units]))
+	check.AddResultf(nagiosplugin.OK, metric.ToStringLastDataPoint())
 }
 
 func setupFlags() {

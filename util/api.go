@@ -15,25 +15,6 @@ import (
 	"time"
 )
 
-var APIUnits = map[string]string{
-	"RAW":          "",
-	"BITS":         "b",
-	"BYTES":        "B",
-	"KILOBITS":     "kb",
-	"KILOBYTES":    "KB",
-	"MEGABITS":     "mb",
-	"MEGABYTES":    "MB",
-	"GIGABITS":     "gb",
-	"GIGABYTES":    "GB",
-	"TERABYTES":    "TB",
-	"PETABYTES":    "PB",
-	"MILLISECONDS": "ms",
-	"SECONDS":      "secs",
-	"MINUTES":      "mins",
-	"HOURS":        "hours",
-	"DAYS":         "days",
-}
-
 type MMSAPI struct {
 	client   *http.Client
 	hostname string
