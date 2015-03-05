@@ -111,6 +111,8 @@ func doMetricCheck(check *nagiosplugin.Check, api *util.MMSAPI, host *model.Host
 		return
 	}
 
+	check.AddPerfDatum(metricName, "", lastDataPoint.Value)
+
 	critRange, err := nagiosplugin.ParseRange(critical)
 	if err != nil {
 		check.AddResultf(nagiosplugin.UNKNOWN, "Error parsing critical range. Error: %v", err)
@@ -118,7 +120,7 @@ func doMetricCheck(check *nagiosplugin.Check, api *util.MMSAPI, host *model.Host
 	}
 
 	if critRange.Check(lastDataPoint.Value) {
-		check.AddResultf(nagiosplugin.CRITICAL, "%v %v %v", metricName, lastDataPoint.Value, metric.Units)
+		check.AddResultf(nagiosplugin.CRITICAL, "%v %v %v", metricName, lastDataPoint.Value, util.APIUnits[metric.Units])
 		return
 	}
 
@@ -129,11 +131,11 @@ func doMetricCheck(check *nagiosplugin.Check, api *util.MMSAPI, host *model.Host
 	}
 
 	if warnRange.Check(lastDataPoint.Value) {
-		check.AddResultf(nagiosplugin.WARNING, "%v %v %v", metricName, lastDataPoint.Value, metric.Units)
+		check.AddResultf(nagiosplugin.WARNING, "%v %v %v", metricName, lastDataPoint.Value, util.APIUnits[metric.Units])
 		return
 	}
 
-	check.AddResultf(nagiosplugin.OK, fmt.Sprintf("%v %v %v", metricName, lastDataPoint.Value, metric.Units))
+	check.AddResultf(nagiosplugin.OK, fmt.Sprintf("%v %v %v", metricName, lastDataPoint.Value, util.APIUnits[metric.Units]))
 }
 
 func setupFlags() {
