@@ -19,9 +19,9 @@ const (
 )
 
 var groupId string
-var server string
-var metricName string
 var hostname string
+var metricName string
+var server string
 var warning string
 var critical string
 var timeout int
@@ -45,13 +45,13 @@ func main() {
 	}
 
 	username, apikey := config.GetCredentials()
-	api, err := util.NewMMSAPI(hostname, timeout, username, apikey)
+	api, err := util.NewMMSAPI(server, timeout, username, apikey)
 	if err != nil {
 		check.AddResultf(nagiosplugin.UNKNOWN, "Failed to create API. Error: %v", err)
 		return
 	}
 
-	host, err := api.GetHostByName(groupId, server)
+	host, err := api.GetHostByName(groupId, hostname)
 	if err != nil {
 		check.AddResultf(nagiosplugin.UNKNOWN, "%v", err)
 		return
@@ -142,12 +142,12 @@ func setupFlags() {
 	const (
 		groupIdDefault  = ""
 		groupIdUsage    = "The MMS/Ops Manager group ID that contains the server"
-		serverDefault   = ""
-		serverUsage     = "hostname of the mongod/s to check"
+		hostnameDefault = ""
+		hostnameUsage   = "hostname:port of the mongod/s to check"
 		metricDefault   = ""
 		metricUsage     = "metric to query"
-		hostnameDefault = "https://mms.mongodb.com"
-		hostnameUsage   = "hostname and port of the MMS/Ops Manager service"
+		serverDefault   = "https://mms.mongodb.com"
+		serverUsage     = "hostname and port of the MMS/Ops Manager service"
 		warningDefault  = "~:" // considered negative infinity to positive infinity (https://nagios-plugins.org/doc/guidelines.html#THRESHOLDFORMAT)
 		warningUsage    = "warning threshold for given metric"
 		criticalDefault = "~:"
@@ -161,8 +161,8 @@ func setupFlags() {
 	flag.StringVar(&groupId, "groupid", groupIdDefault, groupIdUsage)
 	flag.StringVar(&groupId, "g", groupIdDefault, groupIdUsage)
 
-	flag.StringVar(&server, "server", serverDefault, serverUsage)
-	flag.StringVar(&server, "s", serverDefault, serverUsage)
+	flag.StringVar(&hostname, "hostname", hostnameDefault, hostnameUsage)
+	flag.StringVar(&hostname, "H", hostnameDefault, hostnameUsage)
 
 	flag.StringVar(&metricName, "metric", metricDefault, metricUsage)
 	flag.StringVar(&metricName, "m", metricDefault, metricUsage)
@@ -170,8 +170,8 @@ func setupFlags() {
 	flag.IntVar(&maxAge, "maxage", maxAgeDefault, maxAgeUsage)
 	flag.IntVar(&maxAge, "a", maxAgeDefault, maxAgeUsage)
 
-	flag.StringVar(&hostname, "hostname", hostnameDefault, hostnameUsage)
-	flag.StringVar(&hostname, "H", hostnameDefault, hostnameUsage)
+	flag.StringVar(&server, "server", serverDefault, serverUsage)
+	flag.StringVar(&server, "s", serverDefault, serverUsage)
 
 	flag.StringVar(&warning, "warning", warningDefault, warningUsage)
 	flag.StringVar(&warning, "w", warningDefault, warningUsage)
@@ -185,10 +185,10 @@ func setupFlags() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stdout, "Usage: check_mongodb_mms  -g groupid -s server [-m metric] [-a age] [-H hostname] [-t timeout] [-w warning_level] [-c critica_level]\n")
 		fmt.Fprintf(os.Stdout, "     -g, --groupid  %v\n", groupIdUsage)
-		fmt.Fprintf(os.Stdout, "     -s, --server  %v\n", serverUsage)
+		fmt.Fprintf(os.Stdout, "     -H, --hostname %v\n", hostnameUsage)
 		fmt.Fprintf(os.Stdout, "     -m, --metric (no metric means check last ping age in seconds) %v\n", metricUsage)
 		fmt.Fprintf(os.Stdout, "     -a, --maxage (default %v) %v\n", maxAgeDefault, maxAgeUsage)
-		fmt.Fprintf(os.Stdout, "     -H, --hostname (default: %v) %v\n", hostnameDefault, hostnameUsage)
+		fmt.Fprintf(os.Stdout, "     -s, --server (default: %v) %v\n", serverDefault, serverUsage)
 		fmt.Fprintf(os.Stdout, "     -w, --warning (default: %v) %v\n", warningDefault, warningUsage)
 		fmt.Fprintf(os.Stdout, "     -c, --critical (default: %v) %v\n", criticalDefault, criticalUsage)
 		fmt.Fprintf(os.Stdout, "     -t, --timeout (default: %v) %v\n", timeoutDefault, timeoutUsage)
