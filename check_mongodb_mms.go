@@ -29,7 +29,7 @@ var maxAge int
 
 func main() {
 	setupFlags()
-	if server == "" || groupId == "" {
+	if hostname == "" || groupId == "" {
 		flag.Usage()
 		os.Exit(2)
 		return
@@ -183,7 +183,7 @@ func setupFlags() {
 	flag.IntVar(&timeout, "t", timeoutDefault, timeoutUsage)
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stdout, "Usage: check_mongodb_mms  -g groupid -s server [-m metric] [-a age] [-H hostname] [-t timeout] [-w warning_level] [-c critica_level]\n")
+		fmt.Fprintf(os.Stdout, "Usage: check_mongodb_mms  -g groupid -H hostname [-m metric] [-a age] [-s server] [-t timeout] [-w warning_level] [-c critica_level]\n")
 		fmt.Fprintf(os.Stdout, "     -g, --groupid  %v\n", groupIdUsage)
 		fmt.Fprintf(os.Stdout, "     -H, --hostname %v\n", hostnameUsage)
 		fmt.Fprintf(os.Stdout, "     -m, --metric (no metric means check last ping age in seconds) %v\n", metricUsage)
