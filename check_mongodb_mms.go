@@ -154,7 +154,7 @@ func setupFlags() {
 		criticalUsage   = "critical threshold for given metric"
 		timeoutDefault  = 10
 		timeoutUsage    = "connection timeout connecting MMS/Ops Manager service"
-		maxAgeDefault   = 180
+		maxAgeDefault   = 360
 		maxAgeUsage     = "the maximum number of seconds old a metric before it is considerd stale"
 	)
 
