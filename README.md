@@ -30,7 +30,7 @@ The supported list of metric names can be found at https://docs.opsmanager.mongo
 
      -w and -c support the standard nagios threshold formats.
      See https://nagios-plugins.org/doc/guidelines.html#THRESHOLDFORMAT for more details.
-## Examples
+## Example Command Line Usage
 MMS/Ops Manager not receiving a ping from a host is a warning after 180 seconds and critical after 300 seconds.
 
     ./check_mongodb_mms -g 54f84f43e6ccc36e22eef700 -H my-server.example.com:27017 -w 180 -c 300
@@ -42,6 +42,27 @@ Delete Operations / Sec is considered a warning at 10 and critical at 25.
 Virtual Memory usage is considered a warning at 8000 MB and critical at 10000 MB.
 
     ./check_mongodb_mms -g 54f84f43e6ccc36e22eef700 -H my-server.example.com:27017 -m MEMORY_VIRTUAL -w 8000 -c 10000
+    
+## Example Nagios Config
+    define command {
+      command_nam e  check_mongodb_mms
+      command_line  /usr/local/bin/check_mongodb_mms -g $ARG1$ -H $HOSTNAME$:$_HOSTPORT$ -m $ARG2$ -w $ARG3$ -c $ARG4$
+    }
+    
+    define service {
+        use                 generic-service
+        host_name           my-server.example.com
+        service_description Inserts/Sec
+        check_command       check_mongodb_mms!54f84f43e6ccc36e22eef700!OPCOUNTERS_INSERT!1000!1500
+    }
+
+    define host {
+        use                     generic-host
+        host_name               my-server.example.com
+        alias                   my-server.example.com
+        address                 127.0.0.1
+        _PORT                   27017
+    }
 
 # TODO
 * DB level metrics are not implemented
