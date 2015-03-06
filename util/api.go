@@ -56,8 +56,8 @@ func (api *MMSAPI) GetAllHosts(groupId string) ([]model.Host, error) {
 	}
 
 	hostResp := &model.HostsResponse{}
-	if err := json.Unmarshal([]byte(body), &hostResp); err != nil {
-		return nil, errors.New(fmt.Sprintf("Response did not contain valid JSON. Error: %v, Body: %v", err, body))
+	if err := unMarshalJSON(body, &hostResp); err != nil {
+		return nil, err
 	}
 
 	return hostResp.Hosts, nil
@@ -70,8 +70,8 @@ func (api *MMSAPI) GetHostByName(groupId string, name string) (*model.Host, erro
 	}
 
 	host := &model.Host{}
-	if err := json.Unmarshal([]byte(body), &host); err != nil {
-		return nil, errors.New(fmt.Sprintf("Response did not contain valid JSON. Error: %v, Body: %v", err, body))
+	if err := unMarshalJSON(body, &host); err != nil {
+		return nil, err
 	}
 
 	return host, nil
@@ -84,32 +84,40 @@ func (api *MMSAPI) GetHostMetric(groupId string, hostId string, metricName strin
 	}
 
 	metric := &model.Metric{}
-	if err := json.Unmarshal([]byte(body), &metric); err != nil {
-		return nil, errors.New(fmt.Sprintf("Response did not contain valid JSON. Error: %v, Body: %v", err, body))
+	if err := unMarshalJSON(body, &metric); err != nil {
+		return nil, err
 	}
 
 	return metric, nil
 }
 
-func (api *MMSAPI) doGet(path string) (string, error) {
+func (api *MMSAPI) doGet(path string) ([]byte, error) {
 	uri := fmt.Sprintf("%v/api/public/v1.0%v", api.hostname, path)
 
 	response, err := api.client.Get(uri)
 	if err != nil {
-		return "", errors.New(fmt.Sprintf("Failed to make HTTP request. Error: %v", err))
+		return nil, errors.New(fmt.Sprintf("Failed to make HTTP request. Error: %v", err))
 	}
 	defer response.Body.Close()
 
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return "", errors.New(fmt.Sprintf("Failed to read HTTP response body. Error: %v", err))
+		return nil, errors.New(fmt.Sprintf("Failed to read HTTP response body. Error: %v", err))
 	}
 
 	if response.StatusCode != 200 {
-		return "", handleError(response.StatusCode, string(body[:]))
+		return nil, handleError(response.StatusCode, string(body[:]))
 	}
 
-	return string(body[:]), nil
+	return body, nil
+}
+
+func unMarshalJSON(payload []byte, outType interface{}) error {
+	if err := json.Unmarshal(payload, &outType); err != nil {
+		return errors.New(fmt.Sprintf("Response did not contain valid JSON. Error: %v, Body: %v", err, string(payload[:])))
+	}
+
+	return nil
 }
 
 func handleError(statusCode int, body string) error {
