@@ -12,6 +12,8 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 )
 
@@ -91,6 +93,20 @@ func (api *MMSAPI) GetHostMetric(groupId string, hostId string, metricName strin
 	return metric, nil
 }
 
+func (api *MMSAPI) GetHostDBMetric(groupId string, hostId string, metricName string, dbName string) (*model.Metric, error) {
+	body, err := api.doGet(fmt.Sprintf("/groups/%v/hosts/%v/metrics/%v/%v", groupId, hostId, metricName, escape(dbName)))
+	if err != nil {
+		return nil, err
+	}
+
+	metric := &model.Metric{}
+	if err := unMarshalJSON(body, &metric); err != nil {
+		return nil, err
+	}
+
+	return metric, nil
+}
+
 func (api *MMSAPI) doGet(path string) ([]byte, error) {
 	uri := fmt.Sprintf("%v/api/public/v1.0%v", api.hostname, path)
 
@@ -127,4 +143,8 @@ func handleError(statusCode int, body string) error {
 	}
 
 	return errors.New(fmt.Sprintf("API Error: %v (%v)", jsonBody["reason"], jsonBody["detail"]))
+}
+
+func escape(piece string) string {
+	return strings.Replace(url.QueryEscape(piece), "+", "%20", -1)
 }

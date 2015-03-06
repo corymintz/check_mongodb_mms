@@ -18,10 +18,11 @@ The file should look like:
 The supported list of metric names can be found at https://docs.opsmanager.mongodb.com/current/reference/api/metrics/#entity-fields.
 
 #### Help Output
-    Usage: check_mongodb_mms  -g groupid -H hostname [-m metric] [-a age] [-s server] [-t timeout] [-w warning_level] [-c critica_level]
+    Usage: check_mongodb_mms  -g groupid -H hostname [-m metric] [-d dbname] [-a age] [-s server] [-t timeout] [-w warning_level] [-c critica_level]
      -g, --groupid  The MMS/Ops Manager group ID that contains the server
      -H, --hostname hostname:port of the mongod/s to check
      -m, --metric (no metric means check last ping age in seconds) metric to query
+     -d, --dbname (default ) database name for DB_ metrics
      -a, --maxage (default 180) the maximum number of seconds old a metric before it is considerd stale
      -s, --server (default: https://mms.mongodb.com) hostname and port of the MMS/Ops Manager service
      -w, --warning (default: ~:) warning threshold for given metric
@@ -64,6 +65,3 @@ Virtual Memory usage is considered a warning at 8000 MB and critical at 10000 MB
         address                 127.0.0.1
         _PORT                   27017
     }
-
-# TODO
-* DB level metrics are not implemented

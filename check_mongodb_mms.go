@@ -21,6 +21,7 @@ const (
 var groupId string
 var hostname string
 var metricName string
+var dbName string
 var server string
 var warning string
 var critical string
@@ -93,7 +94,14 @@ func doHostCheck(check *nagiosplugin.Check, host *model.Host) {
 }
 
 func doMetricCheck(check *nagiosplugin.Check, api *util.MMSAPI, host *model.Host) {
-	metric, err := api.GetHostMetric(groupId, host.Id, metricName)
+	var metric *model.Metric
+	var err error
+	if dbName == "" {
+		metric, err = api.GetHostMetric(groupId, host.Id, metricName)
+	} else {
+		metric, err = api.GetHostDBMetric(groupId, host.Id, metricName, dbName)
+	}
+
 	if err != nil {
 		check.AddResultf(nagiosplugin.UNKNOWN, "%v", err)
 		return
@@ -146,6 +154,8 @@ func setupFlags() {
 		hostnameUsage   = "hostname:port of the mongod/s to check"
 		metricDefault   = ""
 		metricUsage     = "metric to query"
+		dbNameDefault   = ""
+		dbNameUsage     = "database name for DB_ metrics"
 		serverDefault   = "https://mms.mongodb.com"
 		serverUsage     = "hostname and port of the MMS/Ops Manager service"
 		warningDefault  = "~:" // considered negative infinity to positive infinity (https://nagios-plugins.org/doc/guidelines.html#THRESHOLDFORMAT)
@@ -167,6 +177,9 @@ func setupFlags() {
 	flag.StringVar(&metricName, "metric", metricDefault, metricUsage)
 	flag.StringVar(&metricName, "m", metricDefault, metricUsage)
 
+	flag.StringVar(&dbName, "dbname", dbNameDefault, dbNameUsage)
+	flag.StringVar(&dbName, "d", dbNameDefault, dbNameUsage)
+
 	flag.IntVar(&maxAge, "maxage", maxAgeDefault, maxAgeUsage)
 	flag.IntVar(&maxAge, "a", maxAgeDefault, maxAgeUsage)
 
@@ -183,10 +196,11 @@ func setupFlags() {
 	flag.IntVar(&timeout, "t", timeoutDefault, timeoutUsage)
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stdout, "Usage: check_mongodb_mms  -g groupid -H hostname [-m metric] [-a age] [-s server] [-t timeout] [-w warning_level] [-c critica_level]\n")
+		fmt.Fprintf(os.Stdout, "Usage: check_mongodb_mms  -g groupid -H hostname [-m metric] [-d dbname] [-a age] [-s server] [-t timeout] [-w warning_level] [-c critica_level]\n")
 		fmt.Fprintf(os.Stdout, "     -g, --groupid  %v\n", groupIdUsage)
 		fmt.Fprintf(os.Stdout, "     -H, --hostname %v\n", hostnameUsage)
 		fmt.Fprintf(os.Stdout, "     -m, --metric (no metric means check last ping age in seconds) %v\n", metricUsage)
+		fmt.Fprintf(os.Stdout, "     -d, --dbname (default %v) %v\n", dbNameDefault, dbNameUsage)
 		fmt.Fprintf(os.Stdout, "     -a, --maxage (default %v) %v\n", maxAgeDefault, maxAgeUsage)
 		fmt.Fprintf(os.Stdout, "     -s, --server (default: %v) %v\n", serverDefault, serverUsage)
 		fmt.Fprintf(os.Stdout, "     -w, --warning (default: %v) %v\n", warningDefault, warningUsage)
