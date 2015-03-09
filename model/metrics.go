@@ -51,7 +51,7 @@ var metricFormaters = map[string]string{
 	"CURSORS_TOTAL_TIMED_OUT":             "%v cursor timeouts since process started",
 	"DB_STORAGE_TOTAL":                    "%v bytes of on-disk storage used",
 	"DB_DATA_SIZE_TOTAL":                  "%v bytes of data stored",
-	"DB_PAGE_FAULT_EXCEPTIONS_THROWN"      "%v page fault exceptions per second",
+	"DB_PAGE_FAULT_EXCEPTIONS_THROWN":     "%v page fault exceptions per second",
 	"EFFECTIVE_LOCK_PERCENTAGE":           "%v effective lock percentage",
 	"EXTRA_INFO_PAGE_FAULTS":              "%v page faults per second",
 	"GLOBAL_ACCESSES_NOT_IN_MEMORY":       "%v not in memory page accesses per second",
