@@ -27,6 +27,10 @@ var warning string
 var critical string
 var timeout int
 var maxAge int
+var granularity string
+var period string
+var username string
+var apiKey string
 
 func main() {
 	setupFlags()
@@ -39,14 +43,7 @@ func main() {
 	check := nagiosplugin.NewCheck()
 	defer check.Finish()
 
-	config, err := util.LoadConfigFromHome(CredFile)
-	if err != nil {
-		check.AddResultf(nagiosplugin.UNKNOWN, "%v", err)
-		return
-	}
-
-	username, apikey := config.GetCredentials()
-	api, err := util.NewMMSAPI(server, timeout, username, apikey)
+	api, err := util.NewMMSAPI(server, timeout, username, apiKey)
 	if err != nil {
 		check.AddResultf(nagiosplugin.UNKNOWN, "Failed to create API. Error: %v", err)
 		return
@@ -97,9 +94,9 @@ func doMetricCheck(check *nagiosplugin.Check, api *util.MMSAPI, host *model.Host
 	var metric *model.Metric
 	var err error
 	if dbName == "" {
-		metric, err = api.GetHostMetric(groupId, host.Id, metricName)
+		metric, err = api.GetHostMetric(groupId, host.Id, metricName, granularity, period)
 	} else {
-		metric, err = api.GetHostDBMetric(groupId, host.Id, metricName, dbName)
+		metric, err = api.GetHostDBMetric(groupId, host.Id, metricName, dbName, granularity, period)
 	}
 
 	if err != nil {
@@ -166,6 +163,15 @@ func setupFlags() {
 		timeoutUsage    = "connection timeout connecting MMS/Ops Manager service"
 		maxAgeDefault   = 360
 		maxAgeUsage     = "the maximum number of seconds old a metric before it is considerd stale"
+		granularityDefault	= "MINUTE"
+		granularityUsage	= "the size of the epoch. Acceptable values are MINUTE HOUR DAY"
+		periodDefault	= "1H"
+		periodUsage		= "the ISO-8601 formatted time period that specifies how far back in the past to query."
+		usernameDefault	= ""
+		usernameUsage	= "the username for auth"
+		apiKeyDefault	= ""
+		apiKeyUsage	    = "the api key for the user"
+
 	)
 
 	flag.StringVar(&groupId, "groupid", groupIdDefault, groupIdUsage)
@@ -195,8 +201,20 @@ func setupFlags() {
 	flag.IntVar(&timeout, "timeout", timeoutDefault, timeoutUsage)
 	flag.IntVar(&timeout, "t", timeoutDefault, timeoutUsage)
 
+	flag.StringVar(&granularity, "granularity", granularityDefault, granularityUsage)
+	flag.StringVar(&granularity, "r", granularityDefault, granularityUsage)
+
+	flag.StringVar(&period, "period", periodDefault, periodUsage)
+	flag.StringVar(&period, "p", periodDefault, periodUsage)
+
+	flag.StringVar(&username, "username", usernameDefault, usernameUsage)
+	flag.StringVar(&username, "u", usernameDefault, usernameUsage)
+
+	flag.StringVar(&apiKey, "apikey", apiKeyDefault, usernameUsage)
+	flag.StringVar(&apiKey, "k", apiKeyDefault, apiKeyUsage)
+
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stdout, "Usage: check_mongodb_mms  -g groupid -H hostname [-m metric] [-d dbname] [-a age] [-s server] [-t timeout] [-w warning_level] [-c critica_level]\n")
+		fmt.Fprintf(os.Stdout, "Usage: check_mongodb_mms  -g groupid -H hostname [-m metric] [-d dbname] [-a age] [-s server] [-t timeout] [-w warning_level] [-c critica_level] [-r granularity] [-p period] [-u username] [-k apikey]\n")
 		fmt.Fprintf(os.Stdout, "     -g, --groupid  %v\n", groupIdUsage)
 		fmt.Fprintf(os.Stdout, "     -H, --hostname %v\n", hostnameUsage)
 		fmt.Fprintf(os.Stdout, "     -m, --metric (no metric means check last ping age in seconds) %v\n", metricUsage)
@@ -206,6 +224,10 @@ func setupFlags() {
 		fmt.Fprintf(os.Stdout, "     -w, --warning (default: %v) %v\n", warningDefault, warningUsage)
 		fmt.Fprintf(os.Stdout, "     -c, --critical (default: %v) %v\n", criticalDefault, criticalUsage)
 		fmt.Fprintf(os.Stdout, "     -t, --timeout (default: %v) %v\n", timeoutDefault, timeoutUsage)
+		fmt.Fprintf(os.Stdout, "     -r, --granularity (default: %v) %v\n", granularityDefault, granularityUsage)
+		fmt.Fprintf(os.Stdout, "     -p, --period (default: %v) %v\n", periodDefault, periodUsage)
+		fmt.Fprintf(os.Stdout, "     -u, --username (default: %v) %v\n", usernameDefault, usernameUsage)
+		fmt.Fprintf(os.Stdout, "     -k, --apiKey (default: %v) %v\n", apiKeyDefault, apiKeyUsage)
 		fmt.Fprintf(os.Stdout, "\n     -w and -c support the standard nagios threshold formats.\n"+
 			"     See https://nagios-plugins.org/doc/guidelines.html#THRESHOLDFORMAT for more details.\n")
 	}
