@@ -15,6 +15,7 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
 )
 
 type MMSAPI struct {
@@ -79,8 +80,8 @@ func (api *MMSAPI) GetHostByName(groupId string, name string) (*model.Host, erro
 	return host, nil
 }
 
-func (api *MMSAPI) GetHostMetric(groupId string, hostId string, metricName string) (*model.Metric, error) {
-	body, err := api.doGet(fmt.Sprintf("/groups/%v/hosts/%v/metrics/%v", groupId, hostId, metricName))
+func (api *MMSAPI) GetHostMetric(groupId string, hostId string, metricName string, granularity string, period string) (*model.Metric, error) {
+	body, err := api.doGet(fmt.Sprintf("/groups/%v/hosts/%v/metrics/%v?granularity=%v&period=PT%v", groupId, hostId, metricName, granularity, period))
 	if err != nil {
 		return nil, err
 	}
@@ -93,8 +94,8 @@ func (api *MMSAPI) GetHostMetric(groupId string, hostId string, metricName strin
 	return metric, nil
 }
 
-func (api *MMSAPI) GetHostDBMetric(groupId string, hostId string, metricName string, dbName string) (*model.Metric, error) {
-	body, err := api.doGet(fmt.Sprintf("/groups/%v/hosts/%v/metrics/%v/%v", groupId, hostId, metricName, escape(dbName)))
+func (api *MMSAPI) GetHostDBMetric(groupId string, hostId string, metricName string, dbName string, granularity string, period string) (*model.Metric, error) {
+	body, err := api.doGet(fmt.Sprintf("/groups/%v/hosts/%v/metrics/%v/%v?granularity=%v&period=PT%v", groupId, hostId, metricName, escape(dbName), granularity, period))
 	if err != nil {
 		return nil, err
 	}
